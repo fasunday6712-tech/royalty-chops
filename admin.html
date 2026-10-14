@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Royalty Chops | Admin</title>
+  <meta name="robots" content="noindex,nofollow">
+  <style>
+    :root{--navy:#111e38;--navy2:#1b2a49;--gold:#cba65b;--gold2:#ecd69c;--cream:#fbf7ee;--ink:#1b2435;--muted:#6d7482;--line:#e7e1d5;--white:#fff;--green:#19734b;--red:#a53232}
+    *{box-sizing:border-box} body{margin:0;background:#f4f2ed;color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    header{background:var(--navy);color:#fff;padding:22px max(20px,calc((100% - 1180px)/2));display:flex;justify-content:space-between;align-items:center;gap:18px;border-bottom:3px solid var(--gold)}
+    .brand{display:flex;gap:12px;align-items:center}.crest{display:grid;place-items:center;border:1px solid var(--gold);color:var(--gold2);border-radius:50%;width:44px;height:44px;font-size:22px}.brand strong{display:block;letter-spacing:.08em}.brand small{color:var(--gold2);letter-spacing:.14em;font-size:10px}
+    main{max-width:1180px;margin:28px auto;padding:0 18px 50px}.eyebrow{color:#99752f;text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:800}
+    h1,h2{margin:4px 0 12px}h1{font-family:Georgia,serif;font-size:clamp(28px,4vw,40px)}h2{font-size:20px}.sub{color:var(--muted);margin-top:0}
+    .panel{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0;box-shadow:0 5px 18px #18233b08}
+    .login{max-width:460px;margin:60px auto}.field{display:flex;flex-direction:column;gap:6px;margin:12px 0}.field label{font-weight:650;font-size:13px}.field input,.field textarea,.field select{width:100%;border:1px solid #d9d6cf;border-radius:9px;padding:11px 12px;background:#fff;color:var(--ink);font:inherit}.field textarea{min-height:82px;resize:vertical}
+    button{border:0;border-radius:9px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}.primary{background:var(--gold);color:#17213a}.secondary{background:var(--navy);color:#fff}.quiet{background:#f0eee8;color:var(--ink)}.danger{background:#fbe9e7;color:var(--red)}button:disabled{opacity:.55;cursor:wait}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{justify-content:space-between}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.stat{background:var(--cream);border:1px solid var(--line);padding:15px;border-radius:12px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{font-size:25px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}.tab{background:#e9e5dc;color:var(--ink)}.tab.active{background:var(--navy);color:#fff}
+    .tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:700px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:#fcfbf8}td{font-size:14px}.status{display:inline-block;padding:4px 9px;border-radius:99px;background:#f2eddf;font-size:12px;font-weight:750}.actions{display:flex;gap:6px;flex-wrap:wrap}.actions button{padding:7px 9px;font-size:12px}
+    .notice{padding:12px 14px;border-radius:10px;background:#eef5ef;color:#24583c;margin:12px 0}.notice.error{background:#fbe9e7;color:#8b2929}.hidden{display:none!important}.empty{padding:25px;text-align:center;color:var(--muted)}.check{display:flex;align-items:center;gap:9px}.check input{width:auto}.product-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}.span2{grid-column:1/-1}.muted{color:var(--muted);font-size:12px}
+    footer{text-align:center;color:var(--muted);padding:24px;font-size:12px}
+    @media(max-width:720px){header{padding:16px}.grid{grid-template-columns:1fr}.panel{padding:16px}.product-form{grid-template-columns:1fr}.span2{grid-column:auto}.login{margin:28px auto}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="crest">♛</div><div><strong>ROYALTY CHOPS</strong><small>ADMIN DASHBOARD</small></div></div>
+  <button id="signOutBtn" class="quiet hidden">Sign out</button>
+</header>
+<main>
+  <section id="loginPanel" class="panel login">
+    <div class="eyebrow">Private access</div><h1>Welcome back.</h1><p class="sub">Sign in to manage enquiries and products.</p>
+    <form id="loginForm">
+      <div class="field"><label for="email">Admin email</label><input id="email" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div>
+      <button class="primary" type="submit" id="loginBtn">Sign in</button>
+    </form>
+    <div id="loginMessage" class="notice hidden" role="status"></div>
+    <p class="muted">Access is controlled by Supabase authentication and database policies. Public sign-up is intentionally not provided here.</p>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="row between"><div><div class="eyebrow">Royalty Chops · Management</div><h1>Dashboard</h1><p class="sub">Review customer enquiries and keep your menu up to date.</p></div><button id="refreshBtn" class="secondary">Refresh data</button></div>
+    <div id="globalMessage" class="notice hidden" role="status"></div>
+    <div class="grid">
+      <div class="stat"><span>Total enquiries loaded</span><strong id="totalCount">0</strong></div>
+      <div class="stat"><span>New enquiries</span><strong id="newCount">0</strong></div>
+      <div class="stat"><span>Active products</span><strong id="activeCount">0</strong></div>
+    </div>
+    <div class="tabs"><button class="tab active" data-tab="orders">Enquiries</button><button class="tab" data-tab="products">Products</button></div>
+    <section id="ordersSection" class="panel">
+      <div class="row between"><div><h2>Customer enquiries</h2><p class="sub">Update each enquiry as you follow up on WhatsApp.</p></div><label class="muted">Filter: <select id="statusFilter"><option value="all">All statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="confirmed">Confirmed</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label></div>
+      <div class="tablewrap"><table><thead><tr><th>Date</th><th>Product</th><th>Customer</th><th>Qty</th><th>Notes</th><th>Status</th><th>Action</th></tr></thead><tbody id="ordersBody"></tbody></table></div>
+      <div id="ordersEmpty" class="empty hidden">No enquiries found for this filter.</div>
+    </section>
+    <section id="productsSection" class="panel hidden">
+      <div class="row between"><div><h2>Menu products</h2><p class="sub">Add or edit product details, or deactivate an item to hide it from the public menu.</p></div><button id="addProductBtn" class="primary">+ Add product</button></div>
+      <div id="productFormWrap" class="panel hidden" style="background:#fcfbf8">
+        <h2 id="productFormTitle">Add product</h2>
+        <form id="productForm">
+          <input type="hidden" id="productId">
+          <div class="product-form">
+            <div class="field"><label for="pName">Product name *</label><input id="pName" required maxlength="120"></div>
+            <div class="field"><label for="pCategory">Category *</label><input id="pCategory" required maxlength="80" placeholder="e.g. Small Chops"></div>
+            <div class="field span2"><label for="pDescription">Description</label><textarea id="pDescription" maxlength="1000"></textarea></div>
+            <div class="field span2"><label for="pImage">Image URL</label><input id="pImage" type="url" placeholder="https://..."><span class="muted">Use a publicly accessible image URL. This dashboard does not upload image files.</span></div>
+            <label class="check field span2"><input id="pActive" type="checkbox" checked> Active (visible to visitors if the public site uses the same product data)</label>
+          </div>
+          <div class="row"><button class="primary" type="submit" id="saveProductBtn">Save product</button><button class="quiet" type="button" id="cancelProductBtn">Cancel</button></div>
+        </form>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>Product</th><th>Category</th><th>Description</th><th>Visibility</th><th>Actions</th></tr></thead><tbody id="productsBody"></tbody></table></div>
+      <div id="productsEmpty" class="empty hidden">No products found.</div>
+    </section>
+  </section>
+</main>
+<footer>Royalty Chops · Private administration · Never share your password or secret API key.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Replace these two placeholders with the values from your OWN Supabase project.
+  // Use the Project URL and publishable key only. Never put a secret/service_role key here.
+  const SUPABASE_URL = "https://fieykaikbbkiadetbkcp.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_30DUufr5g22YrJ9EOOU9DQ_W1vUXLb6";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  const $ = (id) => document.getElementById(id);
+  let currentOrders = [];
+  let currentProducts = [];
+  const ORDER_STATUSES = ["new", "contacted", "confirmed", "completed", "cancelled"];
+
+  function showMessage(target, message, isError=false) {
+    target.textContent = message;
+    target.classList.remove("hidden", "error");
+    if (isError) target.classList.add("error");
+  }
+  function clearMessage(target) { target.textContent = ""; target.classList.add("hidden"); target.classList.remove("error"); }
+  function safe(value) { return value == null || value === "" ? "—" : String(value); }
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function dateLabel(value) {
+    if (!value) return "—";
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? "—" : d.toLocaleString();
+  }
+  function switchTab(tab) {
+    document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+    $("ordersSection").classList.toggle("hidden", tab !== "orders");
+    $("productsSection").classList.toggle("hidden", tab !== "products");
+  }
+  function setSignedIn(isSignedIn) {
+    $("loginPanel").classList.toggle("hidden", isSignedIn);
+    $("dashboard").classList.toggle("hidden", !isSignedIn);
+    $("signOutBtn").classList.toggle("hidden", !isSignedIn);
+  }
+  async function loadOrders() {
+    const { data, error } = await supabaseClient.from("orders")
+      .select("id,product_name,customer_name,customer_phone,quantity,notes,status,created_at")
+      .order("created_at", { ascending: false }).limit(500);
+    if (error) throw error;
+    currentOrders = data || [];
+    $("totalCount").textContent = currentOrders.length;
+    $("newCount").textContent = currentOrders.filter(o => o.status === "new").length;
+    renderOrders();
+  }
+  function renderOrders() {
+    const filter = $("statusFilter").value;
+    const rows = currentOrders.filter(o => filter === "all" || o.status === filter);
+    $("ordersBody").innerHTML = rows.map(o => {
+      const options = ORDER_STATUSES.map(s => `<option value="${s}" ${o.status===s?"selected":""}>${s}</option>`).join("");
+      return `<tr>
+        <td>${escapeHtml(dateLabel(o.created_at))}</td>
+        <td><strong>${escapeHtml(o.product_name)}</strong></td>
+        <td>${escapeHtml(o.customer_name)}<br><span class="muted">${escapeHtml(o.customer_phone)}</span></td>
+        <td>${escapeHtml(o.quantity)}</td><td>${escapeHtml(o.notes)}</td>
+        <td><select aria-label="Status for ${escapeHtml(o.product_name)}" id="status-${escapeHtml(o.id)}">${options}</select></td>
+        <td><div class="actions"><button class="secondary" data-save-order="${escapeHtml(o.id)}">Save status</button></div></td>
+      </tr>`;
+    }).join("");
+    $("ordersEmpty").classList.toggle("hidden", rows.length > 0);
+  }
+  async function updateOrder(id) {
+    const select = document.getElementById(`status-${id}`);
+    const status = select?.value;
+    if (!ORDER_STATUSES.includes(status)) return;
+    const { error } = await supabaseClient.from("orders").update({status}).eq("id", id);
+    if (error) throw error;
+    showMessage($("globalMessage"), "Enquiry status updated.");
+    await loadOrders();
+  }
+  async function loadProducts() {
+    const { data, error } = await supabaseClient.from("products")
+      .select("id,name,category,description,image_url,is_active,created_at")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    currentProducts = data || [];
+    $("activeCount").textContent = currentProducts.filter(p => p.is_active).length;
+    renderProducts();
+  }
+  function renderProducts() {
+    $("productsBody").innerHTML = currentProducts.map(p => `<tr>
+      <td><strong>${escapeHtml(p.name)}</strong></td><td>${escapeHtml(p.category)}</td>
+      <td>${escapeHtml(p.description)}</td><td><span class="status">${p.is_active ? "Active" : "Inactive"}</span></td>
+      <td><div class="actions"><button class="secondary" data-edit-product="${escapeHtml(p.id)}">Edit</button>
+      <button class="quiet" data-toggle-product="${escapeHtml(p.id)}">${p.is_active ? "Deactivate" : "Activate"}</button></div></td>
+    </tr>`).join("");
+    $("productsEmpty").classList.toggle("hidden", currentProducts.length > 0);
+  }
+  function resetProductForm() {
+    $("productForm").reset(); $("productId").value = ""; $("pActive").checked = true;
+    $("productFormTitle").textContent = "Add product"; $("productFormWrap").classList.add("hidden");
+  }
+  function editProduct(id) {
+    const p = currentProducts.find(item => item.id === id); if (!p) return;
+    $("productId").value = p.id; $("pName").value = p.name || ""; $("pCategory").value = p.category || "";
+    $("pDescription").value = p.description || ""; $("pImage").value = p.image_url || ""; $("pActive").checked = !!p.is_active;
+    $("productFormTitle").textContent = "Edit product"; $("productFormWrap").classList.remove("hidden");
+    $("productFormWrap").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  async function saveProduct(event) {
+    event.preventDefault();
+    const id = $("productId").value;
+    const product = {
+      name: $("pName").value.trim(), category: $("pCategory").value.trim(),
+      description: $("pDescription").value.trim() || null, image_url: $("pImage").value.trim() || null,
+      is_active: $("pActive").checked
+    };
+    if (!product.name || !product.category) return;
+    $("saveProductBtn").disabled = true;
+    try {
+      const result = id
+        ? await supabaseClient.from("products").update(product).eq("id", id)
+        : await supabaseClient.from("products").insert(product);
+      if (result.error) throw result.error;
+      resetProductForm(); showMessage($("globalMessage"), id ? "Product updated." : "Product added.");
+      await loadProducts();
+    } catch (e) { showMessage($("globalMessage"), e.message || "Could not save product.", true); }
+    finally { $("saveProductBtn").disabled = false; }
+  }
+  async function toggleProduct(id) {
+    const p = currentProducts.find(item => item.id === id); if (!p) return;
+    const { error } = await supabaseClient.from("products").update({is_active: !p.is_active}).eq("id", id);
+    if (error) throw error;
+    showMessage($("globalMessage"), `${p.name} is now ${p.is_active ? "inactive" : "active"}.`);
+    await loadProducts();
+  }
+  async function refreshAll() {
+    clearMessage($("globalMessage"));
+    try { await Promise.all([loadOrders(), loadProducts()]); }
+    catch (e) { showMessage($("globalMessage"), e.message || "Could not load dashboard data. Check your connection and RLS policies.", true); }
+  }
+
+  $("loginForm").addEventListener("submit", async (event) => {
+    event.preventDefault(); clearMessage($("loginMessage")); $("loginBtn").disabled = true;
+    try {
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email: $("email").value.trim(), password: $("password").value
+      });
+      if (error) throw error;
+    } catch (e) { showMessage($("loginMessage"), e.message || "Sign-in failed.", true); }
+    finally { $("loginBtn").disabled = false; }
+  });
+  $("signOutBtn").addEventListener("click", async () => {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) showMessage($("globalMessage"), error.message, true);
+  });
+  $("refreshBtn").addEventListener("click", refreshAll);
+  $("statusFilter").addEventListener("change", renderOrders);
+  document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+  $("ordersBody").addEventListener("click", async (event) => {
+    const btn = event.target.closest("[data-save-order]"); if (!btn) return;
+    btn.disabled = true;
+    try { await updateOrder(btn.dataset.saveOrder); }
+    catch (e) { showMessage($("globalMessage"), e.message || "Could not update status. Check admin permissions.", true); }
+    finally { btn.disabled = false; }
+  });
+  $("productsBody").addEventListener("click", async (event) => {
+    const edit = event.target.closest("[data-edit-product]");
+    const toggle = event.target.closest("[data-toggle-product]");
+    if (edit) editProduct(edit.dataset.editProduct);
+    if (toggle) {
+      toggle.disabled = true;
+      try { await toggleProduct(toggle.dataset.toggleProduct); }
+      catch (e) { showMessage($("globalMessage"), e.message || "Could not update product. Check admin permissions.", true); }
+      finally { toggle.disabled = false; }
+    }
+  });
+  $("addProductBtn").addEventListener("click", () => { resetProductForm(); $("productFormWrap").classList.remove("hidden"); $("pName").focus(); });
+  $("cancelProductBtn").addEventListener("click", resetProductForm);
+  $("productForm").addEventListener("submit", saveProduct);
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    setSignedIn(!!session);
+    if (session) setTimeout(refreshAll, 0);
+    else { currentOrders = []; currentProducts = []; }
+  });
+  supabaseClient.auth.getSession().then(({data}) => setSignedIn(!!data.session));
+</script>
+</body>
+</html>
